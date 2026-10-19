@@ -78,6 +78,8 @@
       <div class="ctr"><button type="button" data-k="units" data-d="-1">−</button><output id="o_units">1</output><button type="button" data-k="units" data-d="1">＋</button></div></div>
     <div class="row-item"><div class="t"><b>うち、お掃除機能付き</b><span id="p_auto"></span></div>
       <div class="ctr"><button type="button" data-k="auto" data-d="-1">−</button><output id="o_auto">0</output><button type="button" data-k="auto" data-d="1">＋</button></div></div>
+    <div class="row-item"><div class="t"><b>エアコン台数（天井埋込）</b><span id="p_ceil">14,000円/台</span></div>
+      <div class="ctr"><button type="button" data-k="ceil" data-d="-1">−</button><output id="o_ceil">0</output><button type="button" data-k="ceil" data-d="1">＋</button></div></div>
     <p style="font-weight:700;margin:16px 0 4px">オプション（台数分お選びください）</p>
     <div class="row-item"><div class="t"><b>3点セット</b><span id="p_set3"></span></div>
       <div class="ctr"><button type="button" data-k="set3" data-d="-1">−</button><output id="o_set3">0</output><button type="button" data-k="set3" data-d="1">＋</button></div></div>
@@ -177,15 +179,15 @@ const nowMs = () => Date.now() + clockOffset;
 const isCampaign = () => nowMs() <= new Date(CONFIG.CAMPAIGN_END).getTime();
 let CAMPAIGN = isCampaign();
 // 通常価格
-const NORMAL = { unit:8900, auto:6000, set3:9500, coat:3000, outdoor:4000, drain:2500 };
+const NORMAL = { unit:8900, ceil:14000, auto:6000, set3:9500, coat:3000, outdoor:4000, drain:2500 };
 // キャンペーン価格（〜9/30）
 const CAMP = { first:6000, add:5000, auto:5000, set3:7000, coat:3000, outdoor:4000, drain:2500 };
 const NAMES = {
-  units:"エアコンクリーニング", auto:"お掃除機能付き加算",
+  units:"エアコンクリーニング", ceil:"エアコンクリーニング（天井埋込）", auto:"お掃除機能付き加算",
   set3:"3点セット（防カビ抗菌コート・室外機・ドレンホース）",
   coat:"防カビ・抗菌コート", outdoor:"室外機クリーニング", drain:"ドレンホース洗浄"
 };
-const st = { units:1, auto:0, set3:0, coat:0, outdoor:0, drain:0 };
+const st = { units:1, ceil:0, auto:0, set3:0, coat:0, outdoor:0, drain:0 };
 const yen = n => n.toLocaleString("ja-JP");
 const $ = s => document.querySelector(s);
 
@@ -252,6 +254,7 @@ function calc(){
       : [{name:NAMES.units, qty:u, unit:NORMAL.unit}];
     lines.push({ name:NAMES.units+" "+u+"台", amount, normal:u*NORMAL.unit, items });
   }
+  if (st.ceil) lines.push({ name:NAMES.ceil+" "+st.ceil+"台", amount:st.ceil*NORMAL.ceil, normal:st.ceil*NORMAL.ceil, items:[{name:NAMES.ceil, qty:st.ceil, unit:NORMAL.ceil}] });
   ["auto","set3","coat","outdoor","drain"].forEach(k => {
     if (st[k]) {
       const unit = (CAMPAIGN || k==="set3") ? CAMP[k] : NORMAL[k]; // 3点セットは10月以降も7,000円
@@ -272,13 +275,13 @@ function render(){
   document.querySelectorAll(".ctr button").forEach(b => {
     const k=b.dataset.k, d=+b.dataset.d;
     if (d<0) b.disabled = st[k] <= 0;
-    else b.disabled = k==="units" ? st.units>=20 : st[k] >= st.units;
+    else b.disabled = (k==="units"||k==="ceil") ? st[k]>=20 : k==="auto" ? st.auto >= st.units : st[k] >= st.units + st.ceil;
   });
 }
 document.querySelectorAll(".ctr button").forEach(b => b.addEventListener("click", () => {
   const k=b.dataset.k, d=+b.dataset.d;
   st[k] = Math.max(0, st[k]+d);
-  if (k==="units") Object.keys(st).forEach(x => { if (x!=="units" && st[x] > st.units) st[x] = st.units; });
+    if (st.auto > st.units) st.auto = st.units; ["set3","coat","outdoor","drain"].forEach(x => { if (st[x] > st.units + st.ceil) st[x] = st.units + st.ceil; });
   render();
 }));
 render();
@@ -286,7 +289,7 @@ render();
 
 $("#f").addEventListener("submit", async e => {
   e.preventDefault();
-  if (st.units < 1) { alert("エアコン台数を1台以上にしてください。"); return; }
+  if (st.units + st.ceil < 1) { alert("エアコン台数を1台以上にしてください。"); return; }
   if (checkCampaignEnd()) {
     const m = $("#msg"); m.className = "msg ng";
     m.textContent = "⚠ 期間限定価格の受付は9月30日で終了しました。通常価格で再計算しましたので、金額をご確認のうえ、もう一度「この内容で予約する」を押してください。";
@@ -330,7 +333,7 @@ $("#f").addEventListener("submit", async e => {
   Object.assign(data, {
     note,
     units: st.units, auto_units: st.auto, set3: st.set3 ? 1 : 0, set3_units: st.set3,
-    coat_units: st.coat, outdoor_units: st.outdoor, drain_units: st.drain,
+    ceil_units: st.ceil, coat_units: st.coat, outdoor_units: st.outdoor, drain_units: st.drain,
     breakdown: (CAMPAIGN ? "【期間限定価格】" : "【通常予約】") + c.lines.map(l=>l.name+"="+yen(l.amount)+"円").join(" / "),
     items: c.lines.flatMap(l=>l.items),
     total: c.total, normal_total: c.normal, submitted_at: new Date().toISOString(), page: location.href
