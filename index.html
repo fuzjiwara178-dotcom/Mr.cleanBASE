@@ -325,6 +325,7 @@ $("#f").addEventListener("submit", async e => {
   const consults = [...document.querySelectorAll('input[name=consult]:checked')].map(i=>i.value);
   let note = data.note || "";
   if (consults.length) note = "【その他のご相談】" + consults.join("、") + (note ? "\n" + note : "");
+  const rawDates = { date1: data.date1, date2: data.date2, date3: data.date3 }; // GASには日付だけ（YYYY-MM-DD）を送る
   ["1","2","3"].forEach(n => { if (data["date"+n]) data["date"+n] = data["date"+n] + " " + (data["time"+n] || ""); });
   data.time = "各希望日に記載";
   const ref = (data.ref_code || "").trim();
@@ -332,8 +333,8 @@ $("#f").addEventListener("submit", async e => {
   note = "【希望日】第1 " + data.date1 + " ／ 第2 " + data.date2 + " ／ 第3 " + data.date3 + (note ? "\n" + note : "");
   Object.assign(data, {
     note,
-    units: st.units, auto_units: st.auto, set3: st.set3 ? 1 : 0, set3_units: st.set3,
-    ceil_units: st.ceil, coat_units: st.coat, outdoor_units: st.outdoor, drain_units: st.drain,
+    units: st.units, ceil: st.ceil, auto: st.auto, set3: st.set3, coat: st.coat, outdoor: st.outdoor, drain: st.drain,
+    date1: rawDates.date1, date2: rawDates.date2, date3: rawDates.date3,
     breakdown: (CAMPAIGN ? "【期間限定価格】" : "【通常予約】") + c.lines.map(l=>l.name+"="+yen(l.amount)+"円").join(" / "),
     items: c.lines.flatMap(l=>l.items),
     total: c.total, normal_total: c.normal, submitted_at: new Date().toISOString(), page: location.href
