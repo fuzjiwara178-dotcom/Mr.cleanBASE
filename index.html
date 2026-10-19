@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>エアコンクリーニング ご予約フォーム｜ありがとうエアコンお掃除専門店</title>
-<meta name="description" content="ありがとうエアコンお掃除専門店のエアコンクリーニング予約フォーム。台数とオプションを選ぶと概算が出ます。">
+<title>エアコンクリーニング ご予約フォーム｜Mr.クリーンBASE</title>
+<meta name="description" content="Mr.クリーンBASEのエアコンクリーニング予約フォーム。台数とオプションを選ぶと概算が出ます。">
 <style>
   :root{--bg:#fff8f2;--card:#fff;--ink:#33241c;--muted:#8a7a6e;--line:#f0e2d6;--or:#e8590c;--soft:#fdeee2;--ok:#1f8a70;--warn:#b4532a}
   *{box-sizing:border-box}
@@ -163,7 +163,7 @@
     <div id="msg" class="msg"></div>
   </form>
 
-  <footer>ありがとうエアコンお掃除専門店 ☎ 080-4177-2272<br>© エイムポイント合同会社</footer>
+  <footer>Mr.クリーンBASE ☎ 090-5869-3067<br>© 合同会社Daisy</footer>
 </div>
 <script>
 const CONFIG = {
@@ -347,7 +347,7 @@ $("#f").addEventListener("submit", async e => {
     if (/^R\d{4}-\d+$/.test(String(j.id))) showShare(String(j.id));
     window.scrollTo({top: msg.offsetTop - 100, behavior:"smooth"});
   } catch(err) {
-    msg.className = "msg ng"; msg.textContent = "送信できませんでした。☎080-4177-2272 までご連絡ください。（"+err.message+"）";
+    msg.className = "msg ng"; msg.textContent = "送信できませんでした。☎090-5869-3067 までご連絡ください。（"+err.message+"）";
     btn.disabled = false; btn.textContent = "この内容で予約する";
   }
 });
